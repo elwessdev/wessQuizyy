@@ -1,0 +1,293 @@
+import 'package:flutter/material.dart';
+import 'package:wessQuizyy/Service/auth_service.dart';
+
+
+class SignUpPage extends StatefulWidget {
+  const SignUpPage({super.key});
+
+  @override
+  State<SignUpPage> createState() => _SignUpPageState();
+}
+
+class _SignUpPageState extends State<SignUpPage> {
+
+  final authService = AuthService();
+
+  // Values
+  final _username = TextEditingController();
+  final _email = TextEditingController();
+  final _password = TextEditingController();
+
+  var errorMessage = "";
+  bool isLoading = false;
+
+  void handleSignUp() async {
+
+    if(isLoading) return;
+
+    final username = _username.text;
+    final email = _email.text;
+    final password = _password.text;
+
+    // Validation
+    if(username.isEmpty || email.isEmpty || password.isEmpty) {
+      setState(() {
+        errorMessage = "All fields are required.";
+      });
+      return;
+    }
+    if(username.length < 3) {
+      setState(() {
+        errorMessage = "Username must be at least 3 characters long.";
+      });
+      return;
+    }
+    if(!email.contains("@")){
+      setState(() {
+        errorMessage = "Please enter a valid email address.";
+      });
+      return;
+    }
+    if(password.length < 6) {
+      setState(() {
+        errorMessage = "Password must be at least 6 characters long.";
+      });
+      return;
+    }
+    setState(() {
+      isLoading = true;
+      errorMessage = "";
+    });
+
+    
+    try {
+      await authService.signUp(email, password);
+      setState(() {
+        errorMessage = "";
+      });
+      if(mounted) {
+        Navigator.pushReplacementNamed(context, '/authgate');
+      }
+    } catch(err) {
+      if(mounted) {
+        String errMsg = err.toString();
+
+        // Check for email already in use error
+        if(errMsg.contains('email-already-in-use') || errMsg.contains('email already in use')) {
+          setState(() {
+            errorMessage = "The email address is already in use by another account.";
+          });
+        } else {
+          setState(() {
+            errorMessage = "Something went wrong. Please try again.";
+          });
+        }
+      }
+    } finally {
+      if(mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.all(15.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Create Account",
+                        style: TextStyle(
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                          "Let's get you started.",
+                          style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      Text(
+                          "You are one step away from greatness!",
+                          style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 40),
+                Text(
+                  'Full Name',
+                  style: TextStyle(color: Color(0xFF0a1653), fontWeight: FontWeight.w500, fontSize: 16),
+                ),
+                SizedBox(height: 8),
+                TextField(
+                  controller: _username,
+                  decoration: InputDecoration(
+                    hintText: 'Enter your full name',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(color: Color(0xFF0a1653), width: 2),
+                    ),
+                    prefixIcon: Icon(Icons.person, color: Color(0xFF0a1653)),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  ),
+                ),
+                SizedBox(height: 16),
+                Text(
+                  'Email',
+                  style: TextStyle(color: Color(0xFF0a1653), fontWeight: FontWeight.w500, fontSize: 16),
+                ),
+                SizedBox(height: 8),
+                TextField(
+                  controller: _email,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: InputDecoration(
+                    hintText: 'Enter your email',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(color: Color(0xFF0a1653), width: 2),
+                    ),
+                    prefixIcon: Icon(Icons.email, color: Color(0xFF0a1653)),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  ),
+                ),
+                SizedBox(height: 16),
+                Text(
+                  'Password',
+                  style: TextStyle(color: Color(0xFF0a1653), fontWeight: FontWeight.w500, fontSize: 16),
+                ),
+                SizedBox(height: 8),
+                TextField(
+                  controller: _password,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    hintText: 'Create a password',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(color: Color(0xFF0a1653), width: 2),
+                    ),
+                    prefixIcon: Icon(Icons.lock, color: Color(0xFF0a1653)),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  ),
+                ),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: handleSignUp,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFF0a1653),
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: isLoading
+                      ? SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                        )
+                      : Text(
+                          'Sign Up',
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500, color: Colors.white),
+                        ),
+                ),
+                SizedBox(height: 16),
+                if(errorMessage.isNotEmpty)
+                  Container(
+                    padding: EdgeInsets.all(8.0),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.red.shade300),
+                      borderRadius: BorderRadius.circular(8.0),
+                      color: Colors.red.shade50,
+                    ),
+                    child: Text(
+                      errorMessage,
+                      style: TextStyle(color: Colors.red),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Divider(thickness: 1, color: Colors.grey.shade300)
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        'OR',
+                        style: TextStyle(color: Colors.grey.shade600, fontWeight: FontWeight.w500),
+                      ),
+                    ),
+                    Expanded(
+                      child: Divider(thickness: 1, color: Colors.grey.shade300)
+                    ),
+                  ],
+                ),
+                SizedBox(height: 16),
+                OutlinedButton.icon(
+                  onPressed: () {},
+                  style: OutlinedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    side: BorderSide(color: Colors.grey.shade300),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  icon: Image.network('https://cdn.iconscout.com/icon/free/png-256/google-160-189824.png', height: 24),
+                  label: Text(
+                    'Sign up with Google',
+                    style: TextStyle(color: Colors.black87, fontWeight: FontWeight.w500),
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text("Already have an account? "),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/signin');
+                      },
+                      child: Text(
+                        'Sign In',
+                        style: TextStyle(color: Color(0xFF0a1653), fontWeight: FontWeight.w500),
+                      ),
+                    ),
+                  ]
+                )
+              ],
+            ),
+          ),
+        )
+      ),
+    );
+  }
+}
