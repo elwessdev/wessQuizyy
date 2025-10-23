@@ -11,8 +11,8 @@ import 'App/Game.dart';
 void main() async{
   await dotenv.load(fileName: ".env");
   await Supabase.initialize(
-    url: dotenv.env['DB_URL'],
-    anonKey: dotenv.env['SECRET_KEY'],
+    url: dotenv.env['DB_URL'] ?? '',
+    anonKey: dotenv.env['SECRET_KEY'] ?? '',
   );
   runApp(const MyApp());
 }

@@ -140,7 +140,7 @@ class _QuizState extends State<HomePage> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Color(0xFF4e75ff),
                 shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(5),
+                  borderRadius: BorderRadius.circular(5),
                 ),
               ),
             ),
